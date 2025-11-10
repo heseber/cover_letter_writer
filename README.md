@@ -36,6 +36,19 @@ Or manually:
 uv pip install -e .
 ```
 
+### Activate Virtual Environment
+
+If you're using a virtual environment (recommended):
+```bash
+# Activate the virtual environment
+source .venv/bin/activate
+
+# On Windows
+.venv\Scripts\activate
+```
+
+**Note:** After installation, the `cover-letter-writer` command will be available in your activated virtual environment.
+
 ### Configuration
 
 Create a `.env` file in the project root and add your API key:
