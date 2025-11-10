@@ -146,7 +146,45 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             print(f"\n✗ Error: {self.state.error_message}")
             raise
 
-    @listen(or_(generate_initial_draft, "improve_draft"))
+    @listen("improve")
+    def improve_draft(self):
+        """Generate an improved draft based on feedback."""
+        self.state.current_iteration += 1
+        
+        print("\n" + "="*60)
+        print(f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Improving Draft")
+        print("="*60 + "\n")
+        
+        try:
+            inputs = {
+                "job_description": self.state.job_description,
+                "cv_content": self.state.cv_content,
+                "recommendations_content": self.state.recommendations_content,
+                "certificates_content": self.state.certificates_content,
+                "reviewer_feedback": self.state.reviewer_feedback,
+                "draft_content": self.state.current_draft,
+            }
+            
+            print("✍️  Writer agent is improving the cover letter...")
+            
+            crew = CoverLetterCrew()
+            result = crew.crew().kickoff(inputs=inputs)
+            
+            # Extract writer's output
+            if hasattr(result, 'tasks_output') and len(result.tasks_output) > 0:
+                self.state.current_draft = result.tasks_output[0].raw
+            else:
+                self.state.current_draft = result.raw
+            
+            print("\n✓ Improved draft generated!")
+            print(f"   Draft length: {len(self.state.current_draft)} characters")
+            
+        except Exception as e:
+            self.state.error_message = f"Error improving draft: {str(e)}"
+            print(f"\n✗ Error: {self.state.error_message}")
+            raise
+
+    @listen(or_(generate_initial_draft, improve_draft))
     def review_draft(self):
         """Review the current draft."""
         print("\n" + "="*60)
@@ -215,44 +253,6 @@ class CoverLetterFlow(Flow[CoverLetterState]):
         else:
             print(f"→ Continuing to iteration {self.state.current_iteration + 1}")
             return "improve"
-
-    @listen("improve")
-    def improve_draft(self):
-        """Generate an improved draft based on feedback."""
-        self.state.current_iteration += 1
-        
-        print("\n" + "="*60)
-        print(f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Improving Draft")
-        print("="*60 + "\n")
-        
-        try:
-            inputs = {
-                "job_description": self.state.job_description,
-                "cv_content": self.state.cv_content,
-                "recommendations_content": self.state.recommendations_content,
-                "certificates_content": self.state.certificates_content,
-                "reviewer_feedback": self.state.reviewer_feedback,
-                "draft_content": self.state.current_draft,
-            }
-            
-            print("✍️  Writer agent is improving the cover letter...")
-            
-            crew = CoverLetterCrew()
-            result = crew.crew().kickoff(inputs=inputs)
-            
-            # Extract writer's output
-            if hasattr(result, 'tasks_output') and len(result.tasks_output) > 0:
-                self.state.current_draft = result.tasks_output[0].raw
-            else:
-                self.state.current_draft = result.raw
-            
-            print("\n✓ Improved draft generated!")
-            print(f"   Draft length: {len(self.state.current_draft)} characters")
-            
-        except Exception as e:
-            self.state.error_message = f"Error improving draft: {str(e)}"
-            print(f"\n✗ Error: {self.state.error_message}")
-            raise
 
     @listen("finalize")
     def save_final_document(self):
