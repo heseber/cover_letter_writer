@@ -1,0 +1,48 @@
+.env
+__pycache__/
+lib/
+.DS_Store
+
+# Generated cover letters
+cover_letter*.md
+*.md
+!README.md
+!cover-letter-writer-prd.plan.md
+
+# Output files
+poem.txt
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# UV
+.uv/

@@ -1,0 +1,27 @@
+[project]
+name = "cover_letter_writer"
+version = "0.1.0"
+description = "cover_letter_writer using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]==1.3.0",
+    "pypdf>=5.1.0",
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "pytest>=7.4.0"
+]
+
+[project.scripts]
+cover-letter-writer = "cover_letter_writer.main:main"
+kickoff = "cover_letter_writer.main:kickoff"
+run_crew = "cover_letter_writer.main:kickoff"
+plot = "cover_letter_writer.main:plot"
+run_with_trigger = "cover_letter_writer.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "flow"

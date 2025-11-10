@@ -1,0 +1,52 @@
+Senior Software Engineer - AI/ML Platform
+
+Company: TechCorp Innovation Labs
+Location: San Francisco, CA (Hybrid)
+Type: Full-time
+
+About Us:
+TechCorp Innovation Labs is a leading technology company building cutting-edge AI solutions 
+that transform how businesses operate. We're passionate about innovation, collaboration, 
+and creating products that make a real impact.
+
+About the Role:
+We're seeking a Senior Software Engineer to join our AI/ML Platform team. You'll be 
+responsible for designing and implementing scalable systems that power our machine learning 
+infrastructure, working closely with data scientists and ML engineers to bring AI models 
+into production.
+
+Key Responsibilities:
+- Design and build scalable microservices for ML model deployment and inference
+- Develop APIs and services for model training, versioning, and monitoring
+- Collaborate with ML engineers to optimize model performance and reliability
+- Implement CI/CD pipelines for automated testing and deployment
+- Mentor junior engineers and contribute to technical architecture decisions
+- Work with cloud platforms (AWS, GCP, or Azure) to design fault-tolerant systems
+
+Required Qualifications:
+- 5+ years of software engineering experience
+- Strong proficiency in Python and at least one other language (Go, Java, or Rust)
+- Experience with distributed systems and microservices architecture
+- Hands-on experience with container orchestration (Kubernetes, Docker)
+- Understanding of ML workflows and model deployment challenges
+- Experience with cloud platforms and infrastructure as code
+- Strong problem-solving skills and attention to detail
+- Excellent communication and collaboration abilities
+
+Preferred Qualifications:
+- Experience with ML frameworks (TensorFlow, PyTorch, scikit-learn)
+- Knowledge of MLOps practices and tools (MLflow, Kubeflow, etc.)
+- Contribution to open-source projects
+- Experience with real-time inference systems
+- Background in distributed computing or data engineering
+
+What We Offer:
+- Competitive salary and equity package
+- Comprehensive health, dental, and vision insurance
+- Flexible work arrangements
+- Professional development budget
+- Collaborative and innovative team culture
+- Opportunity to work on impactful AI projects
+
+We value diversity and are committed to creating an inclusive environment for all employees.
+
