@@ -254,6 +254,45 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             print(f"→ Continuing to iteration {self.state.current_iteration + 1}")
             return "improve"
 
+    def _clean_markdown_wrapper(self, content: str) -> str:
+        """
+        Remove markdown code block wrappers if present.
+        
+        Sometimes LLMs wrap their markdown output in code blocks like:
+        ```markdown
+        content here
+        ```
+        or
+        ```
+        content here
+        ```
+        
+        This method strips those wrappers to get the raw content.
+        """
+        content = content.strip()
+        
+        # Check if content starts with ``` and ends with ```
+        if content.startswith('```') and content.endswith('```'):
+            # Remove opening ```
+            content = content[3:]
+            
+            # Remove language identifier if present (e.g., 'markdown')
+            if content.startswith('markdown'):
+                content = content[8:]
+            
+            # Remove first newline after opening ```
+            if content.startswith('\n'):
+                content = content[1:]
+            
+            # Remove closing ```
+            if content.endswith('```'):
+                content = content[:-3]
+            
+            # Remove trailing newline before closing ```
+            content = content.rstrip('\n')
+        
+        return content
+
     @listen("finalize")
     def save_final_document(self):
         """Save the final cover letter to a file."""
@@ -267,6 +306,9 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             if output_path.suffix.lower() != '.md':
                 output_path = output_path.with_suffix('.md')
             
+            # Clean up the draft content - remove markdown code block wrappers if present
+            cleaned_draft = self._clean_markdown_wrapper(self.state.current_draft)
+            
             # Add metadata header
             metadata = f"""---
 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -276,7 +318,7 @@ Status: {'Approved' if self.state.is_approved else 'Max iterations reached'}
 
 """
             
-            final_content = metadata + self.state.current_draft
+            final_content = metadata + cleaned_draft
             
             # Save to file
             with open(output_path, 'w', encoding='utf-8') as f:
