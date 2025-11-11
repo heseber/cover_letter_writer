@@ -19,6 +19,70 @@ write_cover_letter:
     
     The cover letter should be persuasive and make a strong case for why this 
     candidate is an excellent fit for the position.
+
+    === DETAILED WRITING GUIDELINES ===
+    Write the following text so that it is truly indistinguishable from human writing,
+    consciously avoiding every typical marker of AI-generated content.
+    
+    In particular:
+
+    - You MUST NOT use any em-dashes or en-dashes.
+    
+    - Vary punctuation in a way that reflects genuine human habits.
+
+    - Do not default to lists of exactly three items; include lists with any number of items 
+      (two, four, five, etc.), and sometimes avoid lists altogether.
+        
+    - Vary the length and structure of sentences and paragraphs to create a natural, irregular
+      rhythm instead of uniform blocks.
+        
+    - Use transitions and linking words (such as “However,” “Additionally,” or “On the other hand”)
+      with moderation, and do not begin each paragraph with stock transitions.
+        
+    - Avoid repetitive phrasing, mechanically predictable structures, and summarizing points that have
+      already been established.
+        
+    - Incorporate personal anecdotes, real-life examples, subjectively strong opinions, colloquial
+      language, or subtle humor when appropriate.
+        
+    - Occasionally include cultural, regional, or context-dependent references and idioms that would
+      signal authentic human experience and audience awareness.
+        
+    - Do not use robotic or perfectly formal tone throughout—allow for natural changes in register,
+      some informality, and the occasional shift in tone or style.
+        
+    - Avoid overused “AI-sounding” words and expressions, including but not limited to: "robust,"
+      "delve," "utilize," "endeavor," "in today’s world," "as a matter of fact," "exactly," or
+      tricolon patterns ("It does this, this, and this").
+        
+    - Use specific details and nuanced insights instead of generalizations or generic statements;
+      show depth, originality, and lived knowledge.
+        
+    - Present facts accurately and avoid fabricating details, but allow for occasional subtle
+      uncertainty or questioning, as natural in human discourse.
+        
+    - Adjust punctuation so that it does not follow strict, repetitive, or overly perfect patterns;
+      use a mix of punctuation as fits the context.
+        
+    - Maintain proper grammar and spelling at all times, but do not strive for unrealistic
+      flawlessness—natural minor variances are acceptable.
+        
+    - Create an authentic flow by varying pacing, argument structure, and narrative sequence—do
+      not overly optimize for linearity or predictability.
+        
+    - Double-check that the writing lacks any of the following additional AI clues: uniform structure,
+      excessive clarity, flat or neutral tone, absence of context, or abrupt stylistic shifts.
+
+    - Remember, YOU MUST NOT use any em-dashes or en-dashes.
+
+    ---
+
+    Carefully follow these instructions for every sentence, ensuring the writing convincingly mimics
+    human style and intuition in all its variety and subtlety.
+
+    Be sure to use a formal style that is appropriate for a job application letter and reflects the
+    candidate's years of experience and seniority.
+
   expected_output: >
     A complete, professional cover letter in markdown format that effectively 
     maps the candidate's qualifications to the job requirements. The letter 
@@ -45,6 +109,8 @@ review_cover_letter:
     4. How effectively it highlights relevant candidate qualifications
     5. Overall persuasiveness and impact
     6. Proper structure and flow
+    7. Whether the writing is truly indistinguishable from human writing
+    8. Whether the writing uses any em-dashes or en-dashes, which are not allowed.
     
     Provide your assessment in the following format:
     

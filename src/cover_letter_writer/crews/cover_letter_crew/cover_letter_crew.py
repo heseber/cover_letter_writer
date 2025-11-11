@@ -2,7 +2,7 @@ from typing import List
 
 from crewai import Agent, Crew, Process, Task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-from crewai.project import CrewBase, agent, crew, task
+from crewai.project import CrewBase, agent, task
 
 
 @CrewBase
@@ -31,21 +31,30 @@ class CoverLetterCrew:
     def write_cover_letter(self) -> Task:
         return Task(
             config=self.tasks_config["write_cover_letter"],  # type: ignore[index]
+            agent=self.cover_letter_writer(),
         )
 
     @task
     def review_cover_letter(self) -> Task:
         return Task(
             config=self.tasks_config["review_cover_letter"],  # type: ignore[index]
+            agent=self.cover_letter_reviewer(),
         )
 
-    @crew
-    def crew(self) -> Crew:
-        """Creates the Cover Letter Crew"""
+    def writer_crew(self) -> Crew:
+        """Creates a crew with just the writer"""
         return Crew(
-            agents=self.agents,
-            tasks=self.tasks,
+            agents=[self.cover_letter_writer()],
+            tasks=[self.write_cover_letter()],
             process=Process.sequential,
             verbose=True,
         )
 
+    def reviewer_crew(self) -> Crew:
+        """Creates a crew with just the reviewer"""
+        return Crew(
+            agents=[self.cover_letter_reviewer()],
+            tasks=[self.review_cover_letter()],
+            process=Process.sequential,
+            verbose=True,
+        )
