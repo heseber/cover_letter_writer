@@ -86,6 +86,8 @@ write_cover_letter:
     Be sure to use a formal style that is appropriate for a job application letter and reflects the
     candidate's years of experience and seniority.
 
+    Return just the cover letter, no other text surrounding it.
+
   expected_output: >
     A complete, professional cover letter in markdown format that effectively 
     maps the candidate's qualifications to the job requirements. The letter 
