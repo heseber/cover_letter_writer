@@ -54,11 +54,9 @@ class CoverLetterFlow(Flow[CoverLetterState]):
     5. Saves the final approved version
     """
 
-    def _get_crew(self):
-        """Get or create the crew instance (singleton pattern)."""
-        if not hasattr(self, "_crew") or self._crew is None:
-            self._crew = CoverLetterCrew()
-        return self._crew
+    def __init__(self):
+        super().__init__()
+        self.cover_letter_crew = CoverLetterCrew()
 
     @start()
     def load_documents(self):
@@ -123,13 +121,13 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             raise
 
     @listen(load_documents)
-    def generate_initial_draft(self):
+    def create_first_draft(self):
         """Generate the initial cover letter draft."""
         self.state.current_iteration = 1
 
         print("\n" + "=" * 60)
         print(
-            f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Generating Initial Draft"
+            f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Generating First Draft"
         )
         print("=" * 60 + "\n")
 
@@ -146,34 +144,31 @@ class CoverLetterFlow(Flow[CoverLetterState]):
 
             print("✍️  Writer agent is creating the cover letter...")
 
-            # Get crew instance
-            crew = self._get_crew()
-
             # Execute only the writing task
-            result = crew.writer_crew().kickoff(inputs=inputs)
+            result = self.cover_letter_crew.write_crew().kickoff(inputs=inputs)
 
-            # Extract only the writer's output (first task)
+            # Extract the writer's output
             if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
                 self.state.current_draft = result.tasks_output[0].raw
             else:
                 self.state.current_draft = result.raw
 
-            print("\n✓ Initial draft generated successfully!")
+            print("\n✓ First draft generated successfully!")
             print(f"   Draft length: {len(self.state.current_draft)} characters")
 
         except Exception as e:
-            self.state.error_message = f"Error generating draft: {str(e)}"
+            self.state.error_message = f"Error creating draft: {str(e)}"
             print(f"\n✗ Error: {self.state.error_message}")
             raise
 
-    @listen("improve")
-    def improve_draft(self):
+    @listen(condition="revise")
+    def revise_draft(self):
         """Generate an improved draft based on feedback."""
         self.state.current_iteration += 1
 
         print("\n" + "=" * 60)
         print(
-            f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Improving Draft"
+            f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Revising Draft"
         )
         print("=" * 60 + "\n")
 
@@ -187,10 +182,10 @@ class CoverLetterFlow(Flow[CoverLetterState]):
                 "draft_content": self.state.current_draft,
             }
 
-            print("✍️  Writer agent is improving the cover letter...")
+            print("✍️  Writer agent is revising the cover letter...")
 
-            crew = self._get_crew()
-            result = crew.writer_crew().kickoff(inputs=inputs)
+            # Execute only the writing task
+            result = self.cover_letter_crew.write_crew().kickoff(inputs=inputs)
 
             # Extract writer's output
             if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
@@ -206,7 +201,7 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             print(f"\n✗ Error: {self.state.error_message}")
             raise
 
-    @listen(or_(generate_initial_draft, improve_draft))
+    @listen(or_(create_first_draft, revise_draft))
     def review_draft(self):
         """Review the current draft."""
         print("\n" + "=" * 60)
@@ -228,9 +223,8 @@ class CoverLetterFlow(Flow[CoverLetterState]):
 
             print("🔍 Reviewer agent is evaluating the draft...")
 
-            # Get crew instance
-            crew = self._get_crew()
-            result = crew.reviewer_crew().kickoff(inputs=inputs)
+            # Execute only the reviewing task
+            result = self.cover_letter_crew.review_crew().kickoff(inputs=inputs)
 
             # Extract reviewer's feedback
             if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
@@ -243,8 +237,8 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             print("REVIEW FEEDBACK:")
             print("-" * 60)
             print(
-                review_output[:500] + "..."
-                if len(review_output) > 500
+                review_output[:1500] + "..."
+                if len(review_output) > 1500
                 else review_output
             )
             print("-" * 60 + "\n")
@@ -271,7 +265,7 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             print(f"\n✗ Error: {self.state.error_message}")
             raise
 
-    @router(review_draft)
+    @router(condition=review_draft)
     def check_continuation(self):
         """Decide whether to continue iterating or finalize."""
         print("\n" + "=" * 60)
@@ -287,7 +281,7 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             return "finalize"
         else:
             print(f"→ Continuing to iteration {self.state.current_iteration + 1}")
-            return "improve"
+            return "revise"
 
     def _clean_markdown_wrapper(self, content: str) -> str:
         """

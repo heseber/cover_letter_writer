@@ -2,11 +2,14 @@ write_cover_letter:
   description: >
     Write a professional cover letter for the job described in: {job_description}
     
+    === CANDIDATE INFORMATION ===
     Use the following candidate information:
     - CV/Resume: {cv_content}
     - Recommendations: {recommendations_content}
     - Certificates: {certificates_content}
     
+    === REVIEWER FEEDBACK ===
+    Use the following reviewer feedback to improve the draft:
     {reviewer_feedback}
     
     Your task is to create a compelling cover letter that:
@@ -27,7 +30,7 @@ write_cover_letter:
     In particular:
 
     - You MUST NOT use any em-dashes or en-dashes.
-    
+
     - Vary punctuation in a way that reflects genuine human habits.
 
     - Do not default to lists of exactly three items; include lists with any number of items 
