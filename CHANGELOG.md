@@ -148,7 +148,7 @@ For issues and questions:
 
 ---
 
-**Repository:** https://github.com/yourusername/cover-letter-writer
+**Repository:** https://github.com/heseber/cover-letter-writer
 **Documentation:** See README.md
 **License:** See LICENSE file
 
