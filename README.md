@@ -79,7 +79,7 @@ Generate a cover letter from a local job description file:
 cover-letter-writer \
   --job-description path/to/job_description.txt \
   --cv path/to/your_cv.pdf \
-  --output my_cover_letter.md
+  --output-dir ./output
 ```
 
 ### With URL Job Description
@@ -90,7 +90,7 @@ Fetch job description directly from a URL:
 cover-letter-writer \
   --job-description https://company.com/careers/job-posting \
   --cv path/to/your_cv.pdf \
-  --output cover_letter.md
+  --output-dir ./output
 ```
 
 ### With Additional Documents
@@ -101,9 +101,11 @@ Include recommendations and certificates:
 cover-letter-writer \
   --job-description job_desc.txt \
   --cv my_cv.pdf \
-  --documents recommendation1.pdf recommendation2.md certificate.pdf \
+  --additional-docs recommendation1.pdf \
+  --additional-docs recommendation2.md \
+  --additional-docs certificate.pdf \
   --max-iterations 5 \
-  --output cover_letter.md
+  --output-dir ./output
 ```
 
 ### With Translation
@@ -114,26 +116,38 @@ Generate a cover letter and translate it to another language:
 cover-letter-writer \
   --job-description job_desc.txt \
   --cv my_cv.pdf \
-  --translate de \
-  --output cover_letter.md
+  --translate-to de \
+  --output-dir ./output
 ```
 
 This will generate both:
-- `cover_letter.md` (English original)
-- `cover_letter_de.md` (German translation)
+- English original cover letter
+- German translation with `_de` suffix
 
 ### Command-Line Options
 
 ```
 Required Arguments:
   --job-description, -j    Path to job description file or URL to job posting
-  --cv, -c                 Path to your CV/resume file (PDF or Markdown)
+  --cv, -c                 Path to your CV/resume file (.pdf, .md, .txt)
 
 Optional Arguments:
-  --documents, -d          Additional documents (recommendations, certificates, etc.)
-  --output, -o             Output file path (default: cover_letter.md)
-  --max-iterations, -m     Maximum review iterations (default: 3, max: 10)
-  --translate, -t          Translate to language (e.g., 'de', 'fr', 'es', 'German', 'French')
+  --additional-docs, -a    Additional supporting documents (can be specified multiple times)
+  --output-dir, -o         Output directory for results (default: ./output)
+  --max-iterations, -i     Maximum review iterations (default: 3, config: cover_letter_writer.yaml)
+  --translate-to, -t       Target language code for translation (e.g., 'de', 'fr', 'es')
+  
+LLM Configuration:
+  --llm-provider, -p       LLM provider: openai, anthropic, or ollama
+  --llm-model, -m          Specific LLM model name (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
+  --config                 Path to custom config file (default: config/cover_letter_writer.yaml)
+  
+Translation Configuration:
+  --translation-llm-provider    LLM provider for translation (if different from main)
+  --translation-llm-model       LLM model for translation (if different from main)
+  
+Other:
+  --debug                  Enable debug mode with full stack traces
 ```
 
 ### Help
@@ -145,12 +159,21 @@ cover-letter-writer --help
 ## Supported File Formats
 
 ### Input Documents
-- **Job Description**: `.txt`, `.md`, `.markdown`, or URL (HTML)
-- **CV/Resume**: `.pdf`, `.md`, `.markdown`, `.txt`
-- **Additional Documents**: `.pdf`, `.md`, `.markdown`, `.txt`
+All input documents support the following formats:
+- **Text Files**: `.txt` (plain text)
+- **Markdown**: `.md`, `.markdown`
+- **PDF**: `.pdf` (text extraction via pypdf)
+- **URLs**: HTTP/HTTPS URLs for job descriptions (HTML parsing)
+
+Supported for:
+- Job descriptions (files or URLs)
+- CV/Resume (all file formats)
+- Additional documents (recommendations, certificates, portfolios)
 
 ### Output
-- **Cover Letter**: `.md` (Markdown)
+- **Cover Letter**: `.md` (Markdown with metadata header)
+- **Translated Cover Letter**: `.md` (when translation is enabled)
+- **Feedback History**: `.md` (review iteration logs)
 
 ## How It Works
 
@@ -231,19 +254,32 @@ The application uses CrewAI's Flow architecture to manage the multi-step process
 cover-letter-writer \
   --job-description https://jobs.company.com/software-engineer \
   --cv my_cv.pdf \
-  --documents github_contributions.md recommendation_prof_smith.pdf \
-  --output software_engineer_cover_letter.md
+  --additional-docs github_contributions.md \
+  --additional-docs recommendation_prof_smith.pdf \
+  --output-dir ./output/software_engineer
 ```
 
-### Example 2: From Local Files
+### Example 2: From Local Files with Custom Iterations
 
 ```bash
 cover-letter-writer \
   -j job_descriptions/data_scientist.txt \
   -c documents/my_cv.pdf \
-  -d documents/recommendation.pdf documents/certificates.md \
-  -o applications/data_scientist_cover.md \
-  -m 4
+  -a documents/recommendation.pdf \
+  -a documents/certificates.md \
+  -o applications/data_scientist \
+  -i 4
+```
+
+### Example 3: Using Different LLM Provider
+
+```bash
+cover-letter-writer \
+  -j job_desc.txt \
+  -c my_cv.pdf \
+  -p anthropic \
+  -m claude-3-5-sonnet-20241022 \
+  -o ./output
 ```
 
 ## Output Format
