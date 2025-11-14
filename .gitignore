@@ -5,9 +5,10 @@ lib/
 
 # Generated cover letters
 cover_letter*.md
-*.md
-!README.md
-!cover-letter-writer-prd.plan.md
+
+FLOW_FIX_SUMMARY.md
+IMPLEMENTATION_SUMMARY.md
+PROJECT_OVERVIEW.md
 
 # Output files
 poem.txt

@@ -1,22 +1,13 @@
-"""Tools package for Cover Letter Writer."""
+"""Tools for document processing."""
 
-from cover_letter_writer.tools.document_tools import (
-    read_document,
-    read_job_description,
-    read_markdown_file,
-    read_pdf_file,
-    read_text_file,
-    fetch_url_content,
-    is_url,
-)
+from cover_letter_writer.tools.document_parser import DocumentParser
+from cover_letter_writer.tools.pdf_reader import PDFReaderTool, read_pdf
+from cover_letter_writer.tools.web_scraper import WebScraperTool, scrape_web_page
 
 __all__ = [
-    "read_document",
-    "read_job_description",
-    "read_markdown_file",
-    "read_pdf_file",
-    "read_text_file",
-    "fetch_url_content",
-    "is_url",
+    "DocumentParser",
+    "PDFReaderTool",
+    "read_pdf",
+    "WebScraperTool",
+    "scrape_web_page",
 ]
-

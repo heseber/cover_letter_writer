@@ -1,289 +1,315 @@
-"""Main Flow for Cover Letter Generation with Iterative Review."""
+"""Cover Letter Generation Flow using CrewAI Flow."""
 
+import re
 from datetime import datetime
-from pathlib import Path
-from typing import List, Optional
+from typing import Any, Literal
 
 from crewai.flow import Flow, listen, or_, router, start
-from pydantic import BaseModel, Field
 
-from cover_letter_writer.crews.cover_letter_crew.cover_letter_crew import (
-    CoverLetterCrew,
-)
-from cover_letter_writer.tools.document_tools import (
-    read_document,
-    read_job_description,
-)
-
-
-class CoverLetterState(BaseModel):
-    """State management for the cover letter generation flow."""
-
-    # Input data
-    job_description_source: str = ""
-    job_description: str = ""
-    cv_path: str = ""
-    cv_content: str = ""
-    document_paths: List[str] = Field(default_factory=list)
-    recommendations_content: str = "No recommendations provided."
-    certificates_content: str = "No certificates provided."
-
-    # Output configuration
-    output_path: str = "cover_letter.md"
-    max_iterations: int = 3
-
-    # Process state
-    current_iteration: int = 0
-    current_draft: str = ""
-    reviewer_feedback: str = (
-        "This is the initial draft. Please create a compelling cover letter."
-    )
-    is_approved: bool = False
-    error_message: str = ""
+from cover_letter_writer.crews.reviewer_crew import ReviewerCrew
+from cover_letter_writer.crews.translator_crew import TranslatorCrew
+from cover_letter_writer.crews.writer_crew import WriterCrew
+from cover_letter_writer.models.state_models import CoverLetterState, ReviewFeedback
 
 
 class CoverLetterFlow(Flow[CoverLetterState]):
-    """
-    Flow for generating cover letters with iterative review process.
+    """Flow for iterative cover letter generation with review and revision."""
 
-    This flow:
-    1. Reads job description from file or URL
-    2. Reads candidate documents (CV, recommendations, certificates)
-    3. Generates initial cover letter draft
-    4. Iteratively reviews and improves the draft
-    5. Saves the final approved version
-    """
+    def __init__(self, llm: Any, translation_llm: Any | None = None):
+        """
+        Initialize Cover Letter Generation Flow.
 
-    def __init__(self):
+        Args:
+            llm: Language model instance for generation
+            translation_llm: Optional separate LLM for translation (uses main LLM if None)
+        """
         super().__init__()
-        self.cover_letter_crew = CoverLetterCrew()
+        self.llm = llm
+        self.translation_llm = translation_llm or llm
 
     @start()
-    def load_documents(self):
-        """Load and parse all input documents."""
-        print("\n" + "=" * 60)
-        print("COVER LETTER GENERATOR - Starting Document Loading")
-        print("=" * 60 + "\n")
+    def initialize_flow(self):
+        """Initialize the flow and load all documents."""
+        print(f"\n{'=' * 80}")
+        print("COVER LETTER GENERATOR - STARTING")
+        print(f"{'=' * 80}\n")
+        print(f"Job Description length: {len(self.state.job_description)} characters")
+        print(f"CV length: {len(self.state.cv_content)} characters")
+        print(f"Supporting Documents: {len(self.state.supporting_docs)}")
+        print(f"Max Iterations: {self.state.max_iterations}\n")
 
-        try:
-            # Load job description
-            print(
-                f"📄 Loading job description from: {self.state.job_description_source}"
-            )
-            self.state.job_description = read_job_description(
-                self.state.job_description_source
-            )
-            print(
-                f"✓ Job description loaded ({len(self.state.job_description)} characters)"
-            )
+        # Initialize status
+        self.state.status = "WRITING"
 
-            # Load CV
-            print(f"\n📄 Loading CV from: {self.state.cv_path}")
-            self.state.cv_content = read_document(self.state.cv_path)
-            print(f"✓ CV loaded ({len(self.state.cv_content)} characters)")
-
-            # Load additional documents
-            if self.state.document_paths:
-                print(
-                    f"\n📄 Loading {len(self.state.document_paths)} additional document(s)"
-                )
-
-                recommendations = []
-                certificates = []
-
-                for doc_path in self.state.document_paths:
-                    print(f"  - Loading: {doc_path}")
-                    content = read_document(doc_path)
-
-                    # Simple heuristic: if filename contains 'recommend' or 'reference',
-                    # treat as recommendation, otherwise as certificate
-                    filename_lower = Path(doc_path).name.lower()
-                    if "recommend" in filename_lower or "reference" in filename_lower:
-                        recommendations.append(content)
-                    else:
-                        certificates.append(content)
-
-                if recommendations:
-                    self.state.recommendations_content = "\n\n---\n\n".join(
-                        recommendations
-                    )
-                    print(f"✓ Loaded {len(recommendations)} recommendation(s)")
-
-                if certificates:
-                    self.state.certificates_content = "\n\n---\n\n".join(certificates)
-                    print(f"✓ Loaded {len(certificates)} certificate(s)")
-
-            print("\n✓ All documents loaded successfully!")
-
-        except Exception as e:
-            self.state.error_message = f"Error loading documents: {str(e)}"
-            print(f"\n✗ Error: {self.state.error_message}")
-            raise
-
-    @listen(load_documents)
+    @listen(initialize_flow)
     def create_first_draft(self):
         """Generate the initial cover letter draft."""
-        self.state.current_iteration = 1
+        self.state.iteration_count = 1
 
-        print("\n" + "=" * 60)
-        print(
-            f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Generating First Draft"
+        print(f"\n{'=' * 80}")
+        print(f"ITERATION {self.state.iteration_count} - WRITING PHASE")
+        print(f"{'=' * 80}\n")
+
+        # Prepare supporting docs text
+        supporting_docs_text = self._format_supporting_docs()
+
+        # Run writer crew
+        result = (
+            WriterCrew(self.llm)
+            .crew()
+            .kickoff(
+                inputs={
+                    "job_description": self.state.job_description,
+                    "cv_content": self.state.cv_content,
+                    "supporting_documents": supporting_docs_text,
+                    "reviewer_feedback": "This is the initial draft. Please create a compelling cover letter.",
+                    "draft_content": "No previous draft.",
+                }
+            )
         )
-        print("=" * 60 + "\n")
 
-        try:
-            # Prepare inputs for the crew
-            inputs = {
-                "job_description": self.state.job_description,
-                "cv_content": self.state.cv_content,
-                "recommendations_content": self.state.recommendations_content,
-                "certificates_content": self.state.certificates_content,
-                "reviewer_feedback": self.state.reviewer_feedback,
-                "draft_content": "No previous draft.",
-            }
+        # Extract the writer's output
+        if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
+            draft = result.tasks_output[0].raw
+        else:
+            draft = result.raw
 
-            print("✍️  Writer agent is creating the cover letter...")
+        # Clean up the draft
+        draft = self._clean_markdown_wrapper(draft)
 
-            # Execute only the writing task
-            result = self.cover_letter_crew.write_crew().kickoff(inputs=inputs)
+        # Update state
+        self.state.current_draft = draft
 
-            # Extract the writer's output
-            if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
-                self.state.current_draft = result.tasks_output[0].raw
-            else:
-                self.state.current_draft = result.raw
+        print(f"\nFirst draft length: {len(draft)} characters")
+        print(f"Completed iteration {self.state.iteration_count}\n")
 
-            print("\n✓ First draft generated successfully!")
-            print(f"   Draft length: {len(self.state.current_draft)} characters")
+        # Move to review
+        self.state.status = "REVIEWING"
 
-        except Exception as e:
-            self.state.error_message = f"Error creating draft: {str(e)}"
-            print(f"\n✗ Error: {self.state.error_message}")
-            raise
-
-    @listen(condition="revise")
+    @listen("decision_to_revise")
     def revise_draft(self):
         """Generate an improved draft based on feedback."""
-        self.state.current_iteration += 1
+        self.state.iteration_count += 1
 
-        print("\n" + "=" * 60)
-        print(
-            f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Revising Draft"
+        print(f"\n{'=' * 80}")
+        print(f"ITERATION {self.state.iteration_count} - WRITING PHASE")
+        print(f"{'=' * 80}\n")
+
+        # Get latest feedback
+        latest_feedback = self.state.feedback_history[-1].comments
+
+        # Prepare supporting docs text
+        supporting_docs_text = self._format_supporting_docs()
+
+        # Run writer crew
+        result = (
+            WriterCrew(self.llm)
+            .crew()
+            .kickoff(
+                inputs={
+                    "job_description": self.state.job_description,
+                    "cv_content": self.state.cv_content,
+                    "supporting_documents": supporting_docs_text,
+                    "reviewer_feedback": latest_feedback,
+                    "draft_content": self.state.current_draft,
+                }
+            )
         )
-        print("=" * 60 + "\n")
 
-        try:
-            inputs = {
-                "job_description": self.state.job_description,
-                "cv_content": self.state.cv_content,
-                "recommendations_content": self.state.recommendations_content,
-                "certificates_content": self.state.certificates_content,
-                "reviewer_feedback": self.state.reviewer_feedback,
-                "draft_content": self.state.current_draft,
-            }
+        # Extract the writer's output
+        if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
+            revised_draft = result.tasks_output[0].raw
+        else:
+            revised_draft = result.raw
 
-            print("✍️  Writer agent is revising the cover letter...")
+        # Clean up the draft
+        revised_draft = self._clean_markdown_wrapper(revised_draft)
 
-            # Execute only the writing task
-            result = self.cover_letter_crew.write_crew().kickoff(inputs=inputs)
+        # Update state
+        self.state.current_draft = revised_draft
 
-            # Extract writer's output
-            if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
-                self.state.current_draft = result.tasks_output[0].raw
-            else:
-                self.state.current_draft = result.raw
+        print(f"\nRevised draft length: {len(revised_draft)} characters")
+        print(f"Completed iteration {self.state.iteration_count}\n")
 
-            print("\n✓ Improved draft generated!")
-            print(f"   Draft length: {len(self.state.current_draft)} characters")
-
-        except Exception as e:
-            self.state.error_message = f"Error improving draft: {str(e)}"
-            print(f"\n✗ Error: {self.state.error_message}")
-            raise
+        # Move to review
+        self.state.status = "REVIEWING"
 
     @listen(or_(create_first_draft, revise_draft))
     def review_draft(self):
         """Review the current draft."""
-        print("\n" + "=" * 60)
-        print(
-            f"ITERATION {self.state.current_iteration}/{self.state.max_iterations} - Reviewing Draft"
-        )
-        print("=" * 60 + "\n")
+        print(f"\n{'=' * 80}")
+        print(f"ITERATION {self.state.iteration_count} - REVIEW PHASE")
+        print(f"{'=' * 80}\n")
 
-        try:
-            # Prepare inputs for reviewer
-            inputs = {
-                "job_description": self.state.job_description,
-                "cv_content": self.state.cv_content,
-                "recommendations_content": self.state.recommendations_content,
-                "certificates_content": self.state.certificates_content,
-                "draft_content": self.state.current_draft,
-                "reviewer_feedback": "",
-            }
+        # Prepare supporting docs text
+        supporting_docs_text = self._format_supporting_docs()
 
-            print("🔍 Reviewer agent is evaluating the draft...")
-
-            # Execute only the reviewing task
-            result = self.cover_letter_crew.review_crew().kickoff(inputs=inputs)
-
-            # Extract reviewer's feedback
-            if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
-                review_output = result.tasks_output[0].raw
-            else:
-                review_output = result.raw
-
-            print("\n✓ Review completed!")
-            print("\n" + "-" * 60)
-            print("REVIEW FEEDBACK:")
-            print("-" * 60)
-            print(
-                review_output[:1500] + "..."
-                if len(review_output) > 1500
-                else review_output
+        # Run reviewer crew
+        result = (
+            ReviewerCrew(self.llm)
+            .crew()
+            .kickoff(
+                inputs={
+                    "job_description": self.state.job_description,
+                    "cv_content": self.state.cv_content,
+                    "supporting_documents": supporting_docs_text,
+                    "draft_content": self.state.current_draft,
+                    "reviewer_feedback": "",
+                }
             )
-            print("-" * 60 + "\n")
+        )
 
-            # Parse the review to check if approved
-            review_upper = review_output.upper()
-            if (
-                "DECISION: APPROVED" in review_upper
-                or "DECISION:APPROVED" in review_upper
-            ):
-                self.state.is_approved = True
-                print("✓ Draft APPROVED by reviewer!")
-            else:
-                self.state.is_approved = False
-                self.state.reviewer_feedback = (
-                    f"Based on the review, please improve the draft:\n\n{review_output}"
-                )
-                print(
-                    "⚠️  Draft needs improvement. Feedback provided for next iteration."
-                )
-
-        except Exception as e:
-            self.state.error_message = f"Error reviewing draft: {str(e)}"
-            print(f"\n✗ Error: {self.state.error_message}")
-            raise
-
-    @router(condition=review_draft)
-    def check_continuation(self):
-        """Decide whether to continue iterating or finalize."""
-        print("\n" + "=" * 60)
-        print("DECISION POINT")
-        print("=" * 60 + "\n")
-
-        if self.state.is_approved:
-            print("✓ Cover letter approved! Moving to finalization.")
-            return "finalize"
-        elif self.state.current_iteration >= self.state.max_iterations:
-            print(f"⚠️  Maximum iterations ({self.state.max_iterations}) reached.")
-            print("   Proceeding with current draft as final version.")
-            return "finalize"
+        # Extract reviewer's feedback
+        if hasattr(result, "tasks_output") and len(result.tasks_output) > 0:
+            review_output = result.tasks_output[0].raw
         else:
-            print(f"→ Continuing to iteration {self.state.current_iteration + 1}")
-            return "revise"
+            review_output = result.raw
 
-    def _clean_markdown_wrapper(self, content: str) -> str:
+        print("\n✅ Review completed!")
+
+        # Parse the review to check if approved
+        review_upper = review_output.upper()
+        if "DECISION: APPROVED" in review_upper or "DECISION:APPROVED" in review_upper:
+            decision = "APPROVED"
+            comments = review_output
+            print("✅ Draft APPROVED by reviewer!")
+        else:
+            decision = "NEEDS_IMPROVEMENT"
+            comments = (
+                f"Based on the review, please improve the draft:\n\n{review_output}"
+            )
+            print("⚠️  Draft needs improvement. Feedback provided for next iteration.")
+
+        # Create feedback object
+        feedback = ReviewFeedback(
+            iteration=self.state.iteration_count,
+            decision=decision,
+            comments=comments,
+            timestamp=datetime.now(),
+        )
+
+        # Add to history
+        self.state.feedback_history.append(feedback)
+
+        print(f"\nReviewer Decision: {decision}")
+        print(f"Feedback length: {len(review_output)} characters\n")
+
+        # Store decision for routing
+        self.state.final_decision = decision
+
+    @router(review_draft)
+    def route_decision(
+        self,
+    ) -> Literal["decision_to_finalize", "decision_to_revise"]:
+        """
+        Route based on reviewer decision.
+
+        Returns:
+            Next method to execute
+        """
+        decision = self.state.final_decision
+
+        # Check if approved
+        if decision == "APPROVED":
+            print(f"\n{'=' * 80}")
+            print("COVER LETTER APPROVED - Flow Complete")
+            print(f"{'=' * 80}\n")
+            self.state.status = "APPROVED"
+            return "decision_to_finalize"
+
+        # Check if max iterations reached
+        if self.state.iteration_count >= self.state.max_iterations:
+            print(f"\n{'=' * 80}")
+            print("MAX ITERATIONS REACHED - Flow Complete")
+            print(f"{'=' * 80}\n")
+            self.state.status = "MAX_ITERATIONS_REACHED"
+            return "decision_to_finalize"
+
+        # Continue to revision
+        print("\nContinuing to revision phase...")
+        self.state.status = "REVISING"
+        return "decision_to_revise"
+
+    @listen("decision_to_finalize")
+    def complete_flow(self):
+        """Complete the writing phase."""
+        print(f"\n{'=' * 80}")
+        print("COVER LETTER WRITING COMPLETE")
+        print(f"{'=' * 80}\n")
+        print(f"Final Status: {self.state.status}")
+        print(f"Total Iterations: {self.state.iteration_count}")
+        print(f"Total Feedback Entries: {len(self.state.feedback_history)}\n")
+
+    @router(complete_flow)
+    def route_translation(
+        self,
+    ) -> Literal["decision_to_translate", "decision_to_end"]:
+        """
+        Route based on translation requirement.
+
+        Returns:
+            Next method to execute or None to end flow
+        """
+        if self.state.translate_to:
+            print(f"\nTranslation requested to {self.state.translate_to.upper()}...")
+            return "decision_to_translate"
+        else:
+            print("\nNo translation requested. Flow complete.")
+            return "decision_to_end"
+
+    @listen("decision_to_translate")
+    def translate_cover_letter(self):
+        """Translate the final cover letter to the target language."""
+        print(f"\n{'=' * 80}")
+        print(f"TRANSLATION PHASE - Translating to {self.state.translate_to.upper()}")
+        print(f"{'=' * 80}\n")
+
+        # Run translator crew with appropriate LLM
+        result = (
+            TranslatorCrew(self.translation_llm)
+            .crew()
+            .kickoff(
+                inputs={
+                    "cover_letter_content": self.state.current_draft,
+                    "target_language": self.state.translate_to,
+                }
+            )
+        )
+
+        translated_draft = result.raw if hasattr(result, "raw") else str(result)
+
+        # Clean up the translated draft
+        translated_draft = self._clean_markdown_wrapper(translated_draft)
+
+        # Update state
+        self.state.translated_cover_letter = translated_draft
+
+        print(f"\nTranslated cover letter length: {len(translated_draft)} characters")
+        print(f"Translation to {self.state.translate_to.upper()} complete\n")
+
+    @listen(or_(translate_cover_letter, "decision_to_end"))
+    def finalize_flow(self):
+        """Final cleanup and flow termination."""
+        print(f"\n{'=' * 80}")
+        print("FLOW FINALIZED")
+        print(f"{'=' * 80}\n")
+
+    def _format_supporting_docs(self) -> str:
+        """
+        Format supporting documents for display.
+
+        Returns:
+            Formatted supporting documents text
+        """
+        if self.state.supporting_docs:
+            return "\n\n".join(
+                f"Document {i + 1}:\n{doc}"
+                for i, doc in enumerate(self.state.supporting_docs)
+            )
+        return "No additional documents provided."
+
+    @staticmethod
+    def _clean_markdown_wrapper(content: str) -> str:
         """
         Remove markdown code block wrappers if present.
 
@@ -297,6 +323,12 @@ class CoverLetterFlow(Flow[CoverLetterState]):
         ```
 
         This method strips those wrappers to get the raw content.
+
+        Args:
+            content: Raw content from LLM
+
+        Returns:
+            Cleaned content
         """
         content = content.strip()
 
@@ -320,87 +352,12 @@ class CoverLetterFlow(Flow[CoverLetterState]):
             # Remove trailing newline before closing ```
             content = content.rstrip("\n")
 
-        return content
+        # Remove any leading/trailing "Here is" type phrases
+        content = re.sub(
+            r"^(Here is|Here's|Below is|The following is).*?cover letter:?\s*",
+            "",
+            content,
+            flags=re.IGNORECASE | re.MULTILINE,
+        )
 
-    @listen("finalize")
-    def save_final_document(self):
-        """Save the final cover letter to a file."""
-        print("\n" + "=" * 60)
-        print("FINALIZING COVER LETTER")
-        print("=" * 60 + "\n")
-
-        try:
-            # Ensure output path has .md extension
-            output_path = Path(self.state.output_path)
-            if output_path.suffix.lower() != ".md":
-                output_path = output_path.with_suffix(".md")
-
-            # Clean up the draft content - remove markdown code block wrappers if present
-            cleaned_draft = self._clean_markdown_wrapper(self.state.current_draft)
-
-            # Add metadata header
-            metadata = f"""---
-Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-Iterations: {self.state.current_iteration}
-Status: {"Approved" if self.state.is_approved else "Max iterations reached"}
----
-
-"""
-
-            final_content = metadata + cleaned_draft
-
-            # Save to file
-            with open(output_path, "w", encoding="utf-8") as f:
-                f.write(final_content)
-
-            print(f"✓ Cover letter saved to: {output_path.absolute()}")
-            print(f"   Total iterations: {self.state.current_iteration}")
-            print(
-                f"   Status: {'Approved by reviewer' if self.state.is_approved else 'Maximum iterations reached'}"
-            )
-            print(f"   File size: {len(final_content)} characters")
-
-            if not self.state.is_approved:
-                print(
-                    "\n⚠️  Note: This draft reached maximum iterations without final approval."
-                )
-                print("   You may want to review and edit it manually.")
-
-            print("\n" + "=" * 60)
-            print("COVER LETTER GENERATION COMPLETE!")
-            print("=" * 60 + "\n")
-
-        except Exception as e:
-            self.state.error_message = f"Error saving final document: {str(e)}"
-            print(f"\n✗ Error: {self.state.error_message}")
-            raise
-
-
-def create_cover_letter_flow(
-    job_description_source: str,
-    cv_path: str,
-    output_path: str = "cover_letter.md",
-    document_paths: Optional[List[str]] = None,
-    max_iterations: int = 3,
-) -> CoverLetterFlow:
-    """
-    Create and configure a cover letter generation flow.
-
-    Args:
-        job_description_source: File path or URL to job description
-        cv_path: Path to CV/resume file
-        output_path: Path where final cover letter will be saved
-        document_paths: Optional list of paths to additional documents
-        max_iterations: Maximum number of review iterations
-
-    Returns:
-        Configured CoverLetterFlow instance
-    """
-    flow = CoverLetterFlow()
-    flow.state.job_description_source = job_description_source
-    flow.state.cv_path = cv_path
-    flow.state.output_path = output_path
-    flow.state.document_paths = document_paths or []
-    flow.state.max_iterations = max_iterations
-
-    return flow
+        return content.strip()

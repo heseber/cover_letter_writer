@@ -1,0 +1,19 @@
+llm:
+  provider: openai
+  model: gpt-4o
+  temperature: 0.7
+
+writer:
+  max_iterations: 3
+
+output:
+  directory: ./output
+  cover_letter_filename_pattern: "cover_letter_optimized_{timestamp}.md"
+  feedback_filename_pattern: "cover_letter_review_history_{timestamp}.md"
+
+translation:
+  enabled: false
+  target_language: null
+  llm_provider: null  # Uses main LLM if not specified
+  llm_model: null     # Uses main LLM if not specified
+

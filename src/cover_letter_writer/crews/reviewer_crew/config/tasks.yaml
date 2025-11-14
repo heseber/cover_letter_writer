@@ -1,0 +1,50 @@
+review_cover_letter:
+  description: >
+    Critically review the following cover letter draft:
+    
+    {draft_content}
+    
+    Compare it against:
+    - Job Description: {job_description}
+    - Candidate CV: {cv_content}
+    - Supporting Documents: {supporting_documents}
+    
+    Evaluate the cover letter based on:
+    1. Professional quality and writing style
+    2. Grammar, spelling, and formatting
+    3. How well it addresses the job requirements
+    4. How effectively it highlights relevant candidate qualifications
+    5. Overall persuasiveness and impact
+    6. Proper structure and flow
+    7. Whether the writing is truly indistinguishable from human writing
+    8. Whether the writing uses any em-dashes or en-dashes, which are not allowed.
+    9. Whether all expertise mentioned in the cover letter is supported by the candidate's documents.
+    
+    Provide your assessment in the following format:
+    
+    DECISION: [APPROVED or NEEDS_IMPROVEMENT]
+    
+    STRENGTHS:
+    - List specific strengths of the current draft
+    
+    AREAS FOR IMPROVEMENT:
+    - If NEEDS_IMPROVEMENT, provide specific, actionable feedback
+    - Point out exactly what needs to be changed and how
+    - Highlight any missed opportunities to connect qualifications with requirements
+    - Point out any expertise mentioned in the cover letter that is not supported by the candidate's documents.
+    - Request to writer to remove any expertise mentioned in the cover letter that is not supported by the candidate's documents.
+    
+    Only approve (DECISION: APPROVED) if the cover letter meets high professional 
+    standards and effectively makes the case for the candidate. If there are any 
+    significant issues or missed opportunities, or if any expertise mentioned in 
+    the cover letter is not supported by the candidate's documents, 
+    mark as NEEDS_IMPROVEMENT and provide detailed guidance.
+  expected_output: >
+    A structured review containing:
+    1. Clear DECISION (APPROVED or NEEDS_IMPROVEMENT)
+    2. List of specific strengths
+    3. If not approved, detailed actionable feedback on what to improve and how
+    The review should be thorough, specific, and constructive.
+  agent: cover_letter_reviewer
+
+
