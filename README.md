@@ -433,7 +433,9 @@ For issues, questions, or contributions:
 
 ## License
 
-This project uses CrewAI and follows its licensing terms.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2025 Henrik Seidel
 
 ---
 
