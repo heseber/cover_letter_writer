@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-11-14
+
 ### Added
 - Multi-crew architecture with specialized crews (Writer, Reviewer, Translator)
 - Translation crew for multi-language cover letter support
@@ -20,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Anthropic Claude models (`langchain-anthropic`)
 - Support for Ollama local models (`langchain-ollama`)
 - YAML-based configuration file (`config/cover_letter_writer.yaml`)
+- Comprehensive documentation updates (CHANGELOG, SETUP_CHECKLIST, updated examples)
 
 ### Changed
 - Refactored from single-crew to multi-crew architecture
@@ -28,11 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved document tools organization and separation of concerns
 - Enhanced error handling and state management
 - Updated package dependencies in `pyproject.toml`
+- CLI now uses Click instead of argparse
 
 ### Removed
 - Legacy `cover_letter_crew` module (replaced by specialized crews)
+- Legacy `document_tools.py` (replaced by specialized tool modules)
 
-## [0.1.0] - 2024-11-10
+## [0.1.0] - 2025-11-10
 
 ### Added
 - Initial MVP release
@@ -63,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - pytest>=7.4.0
 - langchain-openai>=1.0.2
 
-## [0.0.1] - 2024-11-01
+## [0.0.1] - 2025-11-01
 
 ### Added
 - Initial project setup
@@ -75,7 +80,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release Notes
 
-### Version 0.2.0 (Upcoming)
+### Version 0.2.0
+**Released:** November 14, 2025
+
 This release represents a major architectural refactoring to support multiple specialized crews and multi-language support. The single-crew architecture has been replaced with a modular multi-crew system that allows for better separation of concerns and enhanced extensibility.
 
 **Key Highlights:**
