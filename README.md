@@ -6,8 +6,11 @@ An AI-powered CrewAI Flow application that generates personalized, high-quality 
 
 - 🤖 **Dual AI Agents**: Writer and Reviewer agents collaborate to create high-quality cover letters
 - 🔄 **Iterative Refinement**: Automatic review and improvement cycles ensure quality
+- 🌍 **Translation Support**: Automatically translate cover letters to multiple languages
+- 🔌 **Multi-LLM Support**: Choose from OpenAI, Anthropic Claude, or Ollama models
 - 📄 **Multiple Format Support**: Reads PDF and Markdown documents
 - 🌐 **URL Support**: Fetch job descriptions directly from URLs
+- ⚙️ **YAML Configuration**: Easy configuration management
 - 📝 **Markdown Output**: Easy-to-edit output format
 - 🎯 **Smart Matching**: Automatically maps candidate qualifications to job requirements
 
@@ -51,13 +54,20 @@ source .venv/bin/activate
 
 ### Configuration
 
-Create a `.env` file in the project root and add your API key:
+Create a `.env` file in the project root and add your API key(s):
 
 ```bash
-OPENAI_API_KEY=your_api_key_here
+# OpenAI (default)
+OPENAI_API_KEY=your_openai_key_here
+
+# Anthropic Claude (optional)
+ANTHROPIC_API_KEY=your_anthropic_key_here
+
+# Ollama (optional, for local models)
+# No API key needed, just ensure Ollama is running locally
 ```
 
-Alternatively, you can use other LLM providers supported by CrewAI (Anthropic Claude, local models, etc.).
+The application supports multiple LLM providers. You can configure them in `src/cover_letter_writer/config/cover_letter_writer.yaml`.
 
 ## Usage
 
@@ -96,6 +106,22 @@ cover-letter-writer \
   --output cover_letter.md
 ```
 
+### With Translation
+
+Generate a cover letter and translate it to another language:
+
+```bash
+cover-letter-writer \
+  --job-description job_desc.txt \
+  --cv my_cv.pdf \
+  --translate de \
+  --output cover_letter.md
+```
+
+This will generate both:
+- `cover_letter.md` (English original)
+- `cover_letter_de.md` (German translation)
+
 ### Command-Line Options
 
 ```
@@ -107,6 +133,7 @@ Optional Arguments:
   --documents, -d          Additional documents (recommendations, certificates, etc.)
   --output, -o             Output file path (default: cover_letter.md)
   --max-iterations, -m     Maximum review iterations (default: 3, max: 10)
+  --translate, -t          Translate to language (e.g., 'de', 'fr', 'es', 'German', 'French')
 ```
 
 ### Help
@@ -176,17 +203,25 @@ The application uses CrewAI's Flow architecture to manage the multi-step process
 - **Event-Driven**: Each step triggers the next automatically
 - **Error Handling**: Graceful error handling at each stage
 
-### AI Agents
+### AI Agents (Three Specialized Crews)
 
-#### Cover Letter Writer Agent
+#### Writer Crew
+- **Agent**: Cover Letter Writer
 - **Role**: Professional cover letter writer
 - **Goal**: Create compelling letters that map qualifications to job requirements
 - **Backstory**: Experienced career consultant with expertise in application materials
 
-#### Cover Letter Reviewer Agent
+#### Reviewer Crew
+- **Agent**: Cover Letter Reviewer
 - **Role**: Senior hiring manager and writing critic
 - **Goal**: Ensure professional quality and effective matching
 - **Backstory**: Seasoned hiring manager with extensive review experience
+
+#### Translator Crew (Optional)
+- **Agent**: Cover Letter Translator
+- **Role**: Professional document translator
+- **Goal**: Accurately translate cover letters while preserving tone and formatting
+- **Backstory**: Experienced translator specializing in career documents
 
 ## Examples
 
@@ -269,36 +304,88 @@ crewai run
 
 ## Configuration
 
+### Application Configuration
+
+Edit the main configuration file:
+```
+src/cover_letter_writer/config/cover_letter_writer.yaml
+```
+
+This allows you to configure:
+- LLM provider and model
+- Temperature settings
+- Max iterations
+- Output directory and file patterns
+- Translation settings
+
+Example configuration:
+```yaml
+llm:
+  provider: openai  # or anthropic, ollama
+  model: gpt-4o
+  temperature: 0.7
+
+translation:
+  enabled: false
+  target_language: null
+  llm_provider: null  # Uses main LLM if not specified
+```
+
 ### Customizing Agents
 
-Edit agent configurations in:
+Edit agent configurations in each crew's config directory:
 ```
-src/cover_letter_writer/crews/cover_letter_crew/config/agents.yaml
+src/cover_letter_writer/crews/writer_crew/config/agents.yaml
+src/cover_letter_writer/crews/reviewer_crew/config/agents.yaml
+src/cover_letter_writer/crews/translator_crew/config/agents.yaml
 ```
 
 ### Customizing Tasks
 
-Edit task configurations in:
+Edit task configurations in each crew's config directory:
 ```
-src/cover_letter_writer/crews/cover_letter_crew/config/tasks.yaml
+src/cover_letter_writer/crews/writer_crew/config/tasks.yaml
+src/cover_letter_writer/crews/reviewer_crew/config/tasks.yaml
+src/cover_letter_writer/crews/translator_crew/config/tasks.yaml
 ```
 
 ### Using Different LLM Models
 
-You can configure different models via environment variables or directly in the agent configuration. CrewAI supports:
-- OpenAI (GPT-4, GPT-3.5)
-- Anthropic (Claude)
-- Local models via Ollama
-- Other providers
+The application supports multiple LLM providers:
+
+**OpenAI (Default)**
+```yaml
+llm:
+  provider: openai
+  model: gpt-4o  # or gpt-4o-mini, gpt-3.5-turbo
+  temperature: 0.7
+```
+
+**Anthropic Claude**
+```yaml
+llm:
+  provider: anthropic
+  model: claude-3-5-sonnet-20241022  # or other Claude models
+  temperature: 0.7
+```
+
+**Ollama (Local Models)**
+```yaml
+llm:
+  provider: ollama
+  model: llama3.1  # or other locally installed models
+  temperature: 0.7
+```
 
 ## Future Enhancements
 
 - 🌐 Web interface
 - 🔌 REST API
 - 🎨 Template customization
-- 🌍 Multi-language support
 - 📊 Analytics and tracking
 - 💾 Application history
+- 📧 Email integration
+- 🔗 Job board integrations
 
 ## Support
 

@@ -7,8 +7,6 @@ lib/
 cover_letter*.md
 
 FLOW_FIX_SUMMARY.md
-IMPLEMENTATION_SUMMARY.md
-PROJECT_OVERVIEW.md
 
 # Output files
 poem.txt
