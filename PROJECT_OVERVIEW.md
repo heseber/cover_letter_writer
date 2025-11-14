@@ -157,8 +157,8 @@ echo "OPENAI_API_KEY=your_key_here" > .env
 cover-letter-writer \
   --job-description examples/sample_job_description.txt \
   --cv examples/sample_cv.md \
-  --documents examples/sample_recommendation.md \
-  --output my_cover_letter.md
+  --additional-docs examples/sample_recommendation.md \
+  --output-dir ./output
 ```
 
 ### 4. Review Output
@@ -506,7 +506,7 @@ crewai install
 echo "OPENAI_API_KEY=your_key" > .env
 
 # Run
-cover-letter-writer -j job.txt -c cv.pdf -o cover_letter.md
+cover-letter-writer -j job.txt -c cv.pdf -o ./output
 ```
 
 **Happy job hunting! 🚀**

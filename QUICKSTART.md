@@ -40,8 +40,8 @@ Test the application with the provided examples:
 cover-letter-writer \
   --job-description examples/sample_job_description.txt \
   --cv examples/sample_cv.md \
-  --documents examples/sample_recommendation.md \
-  --output my_first_cover_letter.md
+  --additional-docs examples/sample_recommendation.md \
+  --output-dir ./output
 ```
 
 **Expected time:** 3-10 minutes
@@ -49,7 +49,7 @@ cover-letter-writer \
 ## Step 4: Check the Output
 
 ```bash
-cat my_first_cover_letter.md
+cat output/cover_letter_optimized_*.md
 ```
 
 You should see a professionally written cover letter!
@@ -68,8 +68,8 @@ You should see a professionally written cover letter!
 cover-letter-writer \
   --job-description path/to/job_posting.txt \
   --cv path/to/your_cv.pdf \
-  --documents path/to/recommendation.pdf \
-  --output cover_letter_for_company.md \
+  --additional-docs path/to/recommendation.pdf \
+  --output-dir ./output \
   --max-iterations 3
 ```
 
@@ -79,7 +79,7 @@ cover-letter-writer \
 cover-letter-writer \
   --job-description https://company.com/careers/job-123 \
   --cv my_cv.pdf \
-  --output cover_letter.md
+  --output-dir ./output
 ```
 
 ## Command Options
@@ -88,9 +88,10 @@ cover-letter-writer \
 |--------|-------|----------|-------------|---------|
 | `--job-description` | `-j` | Yes | Job posting file or URL | - |
 | `--cv` | `-c` | Yes | Your CV/resume file | - |
-| `--documents` | `-d` | No | Additional documents | - |
-| `--output` | `-o` | No | Output file path | cover_letter.md |
-| `--max-iterations` | `-m` | No | Max review cycles | 3 |
+| `--additional-docs` | `-a` | No | Additional documents (repeatable) | - |
+| `--output-dir` | `-o` | No | Output directory | ./output |
+| `--max-iterations` | `-i` | No | Max review cycles | 3 |
+| `--translate-to` | `-t` | No | Target language code | - |
 
 ## What Happens During Generation
 
@@ -128,7 +129,7 @@ pip install pypdf
 
 ### Process is slow
 - Normal: Each iteration takes 1-3 minutes
-- Reduce iterations: `--max-iterations 2`
+- Reduce iterations: `-i 2` or `--max-iterations 2`
 - Check internet connection
 - Try during off-peak hours
 

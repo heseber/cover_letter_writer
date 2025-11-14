@@ -18,8 +18,8 @@ To test the application with these sample files, run:
 cover-letter-writer \
   --job-description examples/sample_job_description.txt \
   --cv examples/sample_cv.md \
-  --documents examples/sample_recommendation.md \
-  --output examples/output_cover_letter.md \
+  --additional-docs examples/sample_recommendation.md \
+  --output-dir ./output \
   --max-iterations 3
 ```
 
@@ -30,8 +30,8 @@ cd /path/to/cover_letter_writer
 cover-letter-writer \
   -j examples/sample_job_description.txt \
   -c examples/sample_cv.md \
-  -d examples/sample_recommendation.md \
-  -o examples/output_cover_letter.md
+  -a examples/sample_recommendation.md \
+  -o ./output
 ```
 
 ### Test with Translation
@@ -42,14 +42,14 @@ To test the application with translation to German:
 cover-letter-writer \
   -j examples/sample_job_description.txt \
   -c examples/sample_cv.md \
-  -d examples/sample_recommendation.md \
-  -o examples/output_cover_letter.md \
-  --translate de
+  -a examples/sample_recommendation.md \
+  -o ./output \
+  --translate-to de
 ```
 
 This will generate two files:
-- `examples/output_cover_letter.md` (English original)
-- `examples/output_cover_letter_de.md` (German translation)
+- English original cover letter
+- German translation with `_de` suffix
 
 ### Test with Different LLM Provider
 
@@ -73,8 +73,8 @@ llm:
 cover-letter-writer \
   -j examples/sample_job_description.txt \
   -c examples/sample_cv.md \
-  -d examples/sample_recommendation.md \
-  -o examples/output_cover_letter.md
+  -a examples/sample_recommendation.md \
+  -o ./output
 ```
 
 ## Expected Output
@@ -138,13 +138,13 @@ The translation feature supports any language. Common examples:
 cover-letter-writer \
   -j examples/sample_job_description.txt \
   -c examples/sample_cv.md \
-  --translate de \
-  -o output/cover_letter.md
+  --translate-to de \
+  -o output/
 ```
 
 Output files:
-- `output/cover_letter.md` (English)
-- `output/cover_letter_de.md` (German)
+- English original cover letter
+- German translation with `_de` suffix
 
 ### Example: Translate to Multiple Languages
 
@@ -155,15 +155,15 @@ Generate and translate to French and Spanish:
 cover-letter-writer \
   -j examples/sample_job_description.txt \
   -c examples/sample_cv.md \
-  --translate fr \
-  -o output/cover_letter_fr.md
+  --translate-to fr \
+  -o output/
 
 # Generate English and Spanish
 cover-letter-writer \
   -j examples/sample_job_description.txt \
   -c examples/sample_cv.md \
-  --translate es \
-  -o output/cover_letter_es.md
+  --translate-to es \
+  -o output/
 ```
 
 ### Translation Configuration
@@ -247,10 +247,10 @@ Generate a cover letter with all features:
 cover-letter-writer \
   -j examples/sample_job_description.txt \
   -c examples/sample_cv.md \
-  -d examples/sample_recommendation.md \
-  -o output/senior_swe_cover.md \
-  --max-iterations 5 \
-  --translate de
+  -a examples/sample_recommendation.md \
+  -o output/senior_swe \
+  -i 5 \
+  --translate-to de
 ```
 
 This will:
@@ -269,7 +269,7 @@ Instead of a file, use a direct URL:
 cover-letter-writer \
   -j https://company.com/careers/senior-engineer \
   -c examples/sample_cv.md \
-  -o output/cover_letter.md
+  -o output/
 ```
 
 For more information, see the main [README.md](../README.md) in the project root.

@@ -141,7 +141,7 @@ All core requirements from the PRD have been successfully implemented, with addi
 - ✅ Preserve markdown formatting and structure
 - ✅ Cultural adaptation of professional terminology
 - ✅ Separate output files for translations
-- ✅ Optional translation with `--translate` flag
+- ✅ Optional translation with `--translate-to` flag
 
 **Implementation:**
 - Agent config: `crews/translator_crew/config/agents.yaml` (cover_letter_translator)
@@ -479,8 +479,8 @@ Users can test with:
 cover-letter-writer \
   -j examples/sample_job_description.txt \
   -c examples/sample_cv.md \
-  -d examples/sample_recommendation.md \
-  -o test_output.md
+  -a examples/sample_recommendation.md \
+  -o ./output
 ```
 
 ---
@@ -523,9 +523,12 @@ Guide to example files:
 ```bash
 --job-description, -j    [Required] Job description file or URL
 --cv, -c                 [Required] CV/resume file path
---documents, -d          [Optional] Additional documents
---output, -o             [Optional] Output file (default: cover_letter.md)
---max-iterations, -m     [Optional] Max iterations (default: 3, max: 10)
+--additional-docs, -a    [Optional] Additional documents (repeatable)
+--output-dir, -o         [Optional] Output directory (default: ./output)
+--max-iterations, -i     [Optional] Max iterations (default: 3)
+--translate-to, -t       [Optional] Target language code for translation
+--llm-provider, -p       [Optional] LLM provider (openai, anthropic, ollama)
+--llm-model, -m          [Optional] Specific LLM model name
 ```
 
 ### Environment Variables
@@ -634,7 +637,7 @@ echo "OPENAI_API_KEY=your_key" > .env
 cover-letter-writer \
   --job-description job.txt \
   --cv cv.pdf \
-  --output cover_letter.md
+  --output-dir ./output
 ```
 
 ---

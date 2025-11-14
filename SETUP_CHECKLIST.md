@@ -124,25 +124,25 @@ Expected: Help message displays
 cover-letter-writer \
   --job-description examples/sample_job_description.txt \
   --cv examples/sample_cv.md \
-  --documents examples/sample_recommendation.md \
-  --output test_cover_letter.md
+  --additional-docs examples/sample_recommendation.md \
+  --output-dir ./output
 ```
 
 Expected:
 - Process runs without errors
-- File `test_cover_letter.md` is created
+- Files are created in `./output` directory
 - Contains generated cover letter
 
 ### 3. Verify Output
-- [ ] Check generated file
+- [ ] Check generated files
 
 ```bash
-ls -lh test_cover_letter.md
-cat test_cover_letter.md
+ls -lh output/
+cat output/cover_letter_optimized_*.md
 ```
 
 Expected:
-- File exists
+- Files exist in output directory
 - Contains metadata header
 - Contains cover letter content
 
@@ -152,7 +152,7 @@ Expected:
 - [ ] Remove test output
 
 ```bash
-rm test_cover_letter.md
+rm -rf output/
 ```
 
 ---
@@ -176,7 +176,7 @@ rm test_cover_letter.md
 cover-letter-writer \
   --job-description path/to/your/job.txt \
   --cv path/to/your/cv.pdf \
-  --output my_cover_letter.md
+  --output-dir ./output
 ```
 
 ---
