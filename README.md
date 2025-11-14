@@ -204,9 +204,9 @@ Supported for:
 └────────┬────────┘      │
          │               │
          ▼               │
-    ┌────────┐           │
+    ┌─────────┐          │
     │Approved?│──NO──────┘
-    └───┬────┘       (if not max iterations)
+    └───┬─────┘       (if not max iterations)
         │
        YES
         │
