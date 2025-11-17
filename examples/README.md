@@ -64,7 +64,7 @@ ANTHROPIC_API_KEY=your_anthropic_key_here
 ```yaml
 llm:
   provider: anthropic
-  model: claude-3-5-sonnet-20241022
+  model: claude-sonnet-4-5
   temperature: 0.7
 ```
 
@@ -175,7 +175,7 @@ translation:
   enabled: true
   target_language: de
   llm_provider: anthropic  # Use Claude for translation
-  llm_model: claude-3-5-sonnet-20241022
+  llm_model: claude-sonnet-4-5
 ```
 
 ## Tips for Best Results
@@ -199,7 +199,7 @@ translation:
 - Increase max iterations (e.g., `--max-iterations 5`)
 - Ensure input documents have sufficient detail
 - Check that your LLM API is working correctly
-- Try a more powerful model (e.g., GPT-5 instead of GPT-3.5-turbo)
+- Try a more powerful model (e.g., GPT-5.1 instead of GPT-3.5-turbo)
 
 **Issue: Translation quality issues**
 - Use a more powerful model for translation

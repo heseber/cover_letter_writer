@@ -1,16 +1,5 @@
 write_cover_letter:
   description: >
-    Write a professional cover letter for the job described in: {job_description}
-    
-    === CANDIDATE INFORMATION ===
-    Use the following candidate information:
-    - CV/Resume: {cv_content}
-    - Supporting Documents: {supporting_documents}
-    
-    === REVIEWER FEEDBACK ===
-    Use the following reviewer feedback to improve the draft:
-    {reviewer_feedback}
-    
     === YOUR TASK ===
     Your task is to create a compelling cover letter that:
     1. Addresses the specific requirements mentioned in the job description
@@ -91,6 +80,19 @@ write_cover_letter:
     candidate's years of experience and seniority.
 
     Return just the cover letter, no other text surrounding it.
+    
+    === CANDIDATE INFORMATION ===
+    Use the following candidate information:
+    - Supporting Documents: {supporting_documents}
+    - CV/Resume: {cv_content}
+    
+    === JOB DESCRIPTION ===
+    Write a professional cover letter for the job described below:
+    {job_description}
+    
+    === REVIEWER FEEDBACK ===
+    Use the following reviewer feedback to improve the draft:
+    {reviewer_feedback}
 
   expected_output: >
     A complete, professional cover letter in markdown format that effectively 

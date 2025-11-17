@@ -294,7 +294,7 @@ def plot():
     from cover_letter_writer.utils import LLMFactory
 
     # Create a dummy LLM for plotting
-    llm = LLMFactory.create_llm("openai", "gpt-5", temperature=0.7)
+    llm = LLMFactory.create_llm("openai", "gpt-5.1", temperature=0.7)
 
     flow = CoverLetterFlow(llm)
     flow.plot()

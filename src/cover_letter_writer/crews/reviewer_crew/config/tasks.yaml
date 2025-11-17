@@ -1,14 +1,5 @@
 review_cover_letter:
   description: >
-    Critically review the following cover letter draft:
-    
-    {draft_content}
-    
-    Compare it against:
-    - Job Description: {job_description}
-    - Candidate CV: {cv_content}
-    - Supporting Documents: {supporting_documents}
-    
     Evaluate the cover letter based on:
     1. Professional quality and writing style
     2. Grammar, spelling, and formatting
@@ -39,6 +30,20 @@ review_cover_letter:
     significant issues or missed opportunities, or if any expertise mentioned in 
     the cover letter is not supported by the candidate's documents, 
     mark as NEEDS_IMPROVEMENT and provide detailed guidance.
+    
+    === CANDIDATE CV ===
+    {cv_content}
+    
+    === SUPPORTING DOCUMENTS ===
+    {supporting_documents}
+    
+    === JOB DESCRIPTION ===
+    {job_description}
+    
+    === COVER LETTER DRAFT TO REVIEW ===
+    Critically review the following cover letter draft:
+    
+    {draft_content}
   expected_output: >
     A structured review containing:
     1. Clear DECISION (APPROVED or NEEDS_IMPROVEMENT)

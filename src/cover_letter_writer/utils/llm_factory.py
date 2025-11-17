@@ -108,9 +108,9 @@ class LLMFactory:
             Default model name
         """
         defaults = {
-            "openai": "gpt-5",
-            "anthropic": "claude-3-5-sonnet-20241022",
+            "openai": "gpt-5.1",
+            "anthropic": "claude-sonnet-4-5",
             "ollama": "llama3.1",
         }
-        return defaults.get(provider.lower(), "gpt-5")
+        return defaults.get(provider.lower(), "gpt-5.1")
 
