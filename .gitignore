@@ -45,3 +45,4 @@ htmlcov/
 
 # UV
 .uv/
+job.txt
