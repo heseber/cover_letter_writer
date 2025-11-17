@@ -167,7 +167,7 @@ All core requirements from the PRD have been successfully implemented, with addi
 - Environment variable handling for API keys
 
 Supported Providers:
-- **OpenAI**: gpt-4o, gpt-4o-mini, gpt-3.5-turbo
+- **OpenAI**: gpt-5, gpt-4o, gpt-4o-mini, gpt-3.5-turbo
 - **Anthropic**: claude-3-5-sonnet-20241022, claude-3-opus, claude-3-sonnet
 - **Ollama**: llama3.1, mistral, and other locally installed models
 

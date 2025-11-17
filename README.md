@@ -139,7 +139,7 @@ Optional Arguments:
   
 LLM Configuration:
   --llm-provider, -p       LLM provider: openai, anthropic, or ollama
-  --llm-model, -m          Specific LLM model name (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
+  --llm-model, -m          Specific LLM model name (e.g., 'gpt-5', 'claude-3-5-sonnet-20241022')
   --config                 Path to custom config file (default: config/cover_letter_writer.yaml)
   
 Translation Configuration:
@@ -358,7 +358,7 @@ Example configuration:
 ```yaml
 llm:
   provider: openai  # or anthropic, ollama
-  model: gpt-4o
+  model: gpt-5
   temperature: 0.7
 
 translation:
@@ -393,7 +393,7 @@ The application supports multiple LLM providers:
 ```yaml
 llm:
   provider: openai
-  model: gpt-4o  # or gpt-4o-mini, gpt-3.5-turbo
+  model: gpt-5  # or gpt-4o, gpt-4o-mini, gpt-3.5-turbo
   temperature: 0.7
 ```
 

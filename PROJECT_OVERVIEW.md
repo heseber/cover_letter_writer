@@ -210,7 +210,7 @@ Automatically:
 
 ### 7. 🔌 Multi-LLM Support
 Flexible LLM provider selection:
-- OpenAI (GPT-4o, GPT-4o-mini)
+- OpenAI (GPT-5, GPT-4o, GPT-4o-mini)
 - Anthropic (Claude 3.5 Sonnet)
 - Ollama (Local models like Llama 3.1)
 - Easy configuration via YAML

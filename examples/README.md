@@ -199,7 +199,7 @@ translation:
 - Increase max iterations (e.g., `--max-iterations 5`)
 - Ensure input documents have sufficient detail
 - Check that your LLM API is working correctly
-- Try a more powerful model (e.g., GPT-4o instead of GPT-3.5-turbo)
+- Try a more powerful model (e.g., GPT-5 instead of GPT-3.5-turbo)
 
 **Issue: Translation quality issues**
 - Use a more powerful model for translation
