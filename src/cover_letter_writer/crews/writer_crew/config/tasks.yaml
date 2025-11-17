@@ -83,8 +83,8 @@ write_cover_letter:
     
     === CANDIDATE INFORMATION ===
     Use the following candidate information:
-    - Supporting Documents: {supporting_documents}
     - CV/Resume: {cv_content}
+    - Supporting Documents: {supporting_documents}
     
     === JOB DESCRIPTION ===
     Write a professional cover letter for the job described below:
